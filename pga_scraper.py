@@ -1,6 +1,5 @@
 import requests  # Request module
 import pandas as pd  # Data Wrangling
-import numpy as np  # Data Wrangling
 from bs4 import BeautifulSoup  # Web sraping module
 
 
@@ -18,6 +17,13 @@ def get_headers(soup):
     stat_headers = soup.find_all(class_="col-stat hidden-small hidden-medium")
     for header in stat_headers:
         headers.append(header.get_text())
+
+    return headers
+
+
+def get_headers_labels(soup):
+    '''This function get's the column names to use for the data frame.'''
+    headers = [soup.find(class_="col-stat").get_text()]
 
     return headers
 
@@ -58,6 +64,17 @@ def get_stats(soup, column, categories):
     return stat_list
 
 
+def get_labels(soup, column):
+    '''This function takes the soup created before,
+    the column of the category we care about (count from 1 from left to column x), and
+    the number of other categories on the page (count from right of player to end not including column x).'''
+    stat_list = []
+    rows = soup.find_all("tr", id=lambda value: value and value.startswith("playerStatsRow"))
+    for row in rows:
+        stat_list.append([row.find_all_next("td")[column].get_text()])
+    return stat_list
+
+
 def stats_dict(players, stats):
     '''This function takes two lists, players and stats,
     and creates a dictionary with the player being the key
@@ -75,14 +92,14 @@ def stats_dict(players, stats):
 
 ##Mega function
 def make_dataframe(url, column, categories):
-    ##Create soup object from url.
+    # Create soup object from url.
     response = requests.get(url)
     text = response.text
     soup = BeautifulSoup(text, 'lxml')
 
     # 1. Get Headers
     headers = get_headers(soup)
-    print(headers)
+
     # 2. Get Players
     players = get_players(soup)
 
@@ -102,11 +119,39 @@ def make_dataframe(url, column, categories):
     frame = frame.rename(index=str, columns={'index': 'NAME'})
     return frame
 
+def make_dataframe_label(url, column):
+    # Create soup object from url.
+    response = requests.get(url)
+    text = response.text
+    soup = BeautifulSoup(text, 'lxml')
 
-years = [str(i) for i in range(2017, 2022)]
+    # 1. Get Headers
+    headers = get_headers_labels(soup)
+
+    # 2. Get Players
+    players = get_players(soup)
+
+    # 3. Get Stats
+    stats = get_labels(soup, column)
+
+    # 4. Make stats dictionary.
+    stats_dictionary = stats_dict(players, stats)
+
+    # Make dataframe
+    frame = pd.DataFrame(stats_dictionary, index=headers).T
+
+    # Reset index
+    frame = frame.reset_index()
+
+    # For each Dataframe, change index column to 'NAME'
+    frame = frame.rename(index=str, columns={'index': 'NAME'})
+    return frame
+
+
+years = ['2016', '2017', '2018', '2019', '2021']  # Apparently US open 2020 was held in 2021.
+
 
 for year in years:
-    print(year)
     # Fedex cup points
     fcp = make_dataframe("https://www.pgatour.com/stats/stat.02671.{}.html".format(year), 4, 5)[['NAME', 'POINTS', 'EVENTS', '# OF WINS', '# OF TOP-10S', 'POINTS BEHIND LEAD', 'RESET POINTS']]
     # Top 10's and wins
@@ -151,8 +196,13 @@ for year in years:
         ['NAME', '%', 'PAR OR BETTER', 'MISSED GIR']]
     scrambling = scrambling.rename(columns={'%': 'SCRAMBLING_P'})
 
+    # What's ML without labels
+    us_open_ranking = make_dataframe_label("https://www.pgatour.com/stats/stat.138.y{}.eoff.t026.html".format(year), 3)[
+        ['NAME', 'TOP 10']]
+    us_open_ranking = us_open_ranking.rename(columns={'1ST': 'US_OPEN_TOP_10'})
+
     # Get Dataframes into list.
-    data_frames = [drivedistance, driveacc, gir, sg_putting, sg_teetogreen, sg_total, scrambling]
+    data_frames = [drivedistance, driveacc, gir, sg_putting, sg_teetogreen, sg_total, scrambling, us_open_ranking]
 
     # Merge all Dataframes together
     df_one = pd.DataFrame()
@@ -173,11 +223,10 @@ for year in years:
     df_one['Year'] = year
 
     # Concat dataframe to overall dataframe
-
-    if year == '2017':
+    if year == '2016':
         df_total = pd.DataFrame()
         df_total = pd.concat([df_total, df_one], axis=0)
     else:
         df_total = pd.concat([df_total, df_one], axis=0)
 
-    df_total.to_csv("2022_pga_tour_data.csv")
+    df_total.to_csv("pga_tour_data.csv")
