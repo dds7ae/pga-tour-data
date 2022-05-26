@@ -1,14 +1,18 @@
 # PGA Tour Data
 
-# Environment Setup
+## Inspired by:
+https://www.kaggle.com/datasets/jmpark746/pga-tour-data-2010-2018
+
+## Environment Setup
 1. Install Python 3. I'm using 3.0
 2. Use Pycharm if it makes it easier
 3. Add the modules in `pga_scraper.py` if they are not installed either via `pip3 install x` or your Pycharm.
 4. Make sure the tags in `pga_scraper.py` are still accurate to the HTML just do a simple inspect and see the pattern.
 5. Edit the years if necessary then run `pga_scraper.py`
 6. Then you should get `pga_tour_data.csv.csv`
-7. 
-`pga_tour_data.csv.csv`Each row indicates a golfer's performance for that year.
+7. `pga_tour_data.csv.csv`Each row indicates a golfer's performance for that year.
+
+## Description of Metrics
 
 * Player Name: Name of the golfer
 * Rounds: The number of games that a player played
