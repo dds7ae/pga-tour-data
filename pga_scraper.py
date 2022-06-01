@@ -61,7 +61,7 @@ def get_stats(soup, column, categories):
     # Step 2: Find the metric we care about
     rows = soup.find_all("tr", id=lambda value: value and value.startswith("playerStatsRow"))
     for i, row in enumerate(rows):
-        stat_list[i].insert(0, row.find_all_next("td")[column].get_text())
+        stat_list[i].insert(0, row.find_all_next("td")[column].get_text().replace(",", ""))
     return stat_list
 
 
