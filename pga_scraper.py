@@ -210,7 +210,7 @@ for year in years:
     # What's ML without labels
     us_open_ranking = make_dataframe_label("https://www.pgatour.com/stats/stat.138.y{}.eoff.t026.html".format(year), 3)[
         ['NAME', 'TOP 10']]
-    us_open_ranking = us_open_ranking.rename(columns={'1ST': 'US_OPEN_TOP_10'})
+    us_open_ranking = us_open_ranking.rename(columns={'TOP 10': 'US_OPEN_TOP_10'})
 
     # Get Dataframes into list.
     data_frames = [drivedistance, driveacc, gir, sg_putting, sg_teetogreen, sg_total, scrambling, us_open_ranking]
