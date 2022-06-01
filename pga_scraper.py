@@ -1,6 +1,7 @@
 import requests  # Request module
 import pandas as pd  # Data Wrangling
-from bs4 import BeautifulSoup  # Web sraping module
+from bs4 import BeautifulSoup  # Web scraping module
+import time
 
 
 def get_headers(soup):
@@ -94,19 +95,25 @@ def stats_dict(players, stats):
 def make_dataframe(url, column, categories):
     # Create soup object from url.
     response = requests.get(url)
+    time.sleep(5)
     text = response.text
     soup = BeautifulSoup(text, 'lxml')
 
     # 1. Get Headers
     headers = get_headers(soup)
+    print(headers)
     # 2. Get Players
     players = get_players(soup)
+    print(players)
     # 3. Get Stats
     stats = get_stats(soup, column, categories)
+    print(stats)
     # 4. Make stats dictionary.
     stats_dictionary = stats_dict(players, stats)
+    print(stats_dictionary)
     # Make dataframe
     frame = pd.DataFrame(stats_dictionary, index=headers).T
+    print(frame)
     # Reset index
     frame = frame.reset_index()
 
@@ -118,19 +125,25 @@ def make_dataframe(url, column, categories):
 def make_dataframe_label(url, column):
     # Create soup object from url.
     response = requests.get(url)
+    time.sleep(5)
     text = response.text
     soup = BeautifulSoup(text, 'lxml')
 
     # 1. Get Headers
     headers = get_headers_labels(soup)
+    print(headers)
     # 2. Get Players
     players = get_players(soup)
+    print(players)
     # 3. Get Stats
     stats = get_labels(soup, column)
+    print(stats)
     # 4. Make stats dictionary.
     stats_dictionary = stats_dict(players, stats)
+    print(stats_dictionary)
     # Make dataframe
     frame = pd.DataFrame(stats_dictionary, index=headers).T
+    print(frame)
     # Reset index
     frame = frame.reset_index()
 
@@ -139,7 +152,9 @@ def make_dataframe_label(url, column):
     return frame
 
 
-years = ['2016', '2017', '2018', '2019', '2021']  # Apparently US open 2020 was held in 2021.
+# Apparently US open 2020 was held in 2021
+# and FedEx cups points are wack for 2019, and 2021.
+years = ['2014', '2015', '2016', '2017', '2018']
 
 
 for year in years:
@@ -219,7 +234,7 @@ for year in years:
     df_one['Year'] = year
 
     # Concat dataframe to overall dataframe
-    if year == '2016':
+    if year == '2014':
         df_total = pd.DataFrame()
         df_total = pd.concat([df_total, df_one], axis=0)
     else:
