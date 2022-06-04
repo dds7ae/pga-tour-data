@@ -154,12 +154,13 @@ def make_dataframe_label(url, column):
 
 # Apparently US open 2020 was held in 2021
 # and FedEx cups points are wack for 2019, and 2021.
-years = ['2014', '2015', '2016', '2017', '2018']
+years = ['2016', '2017', '2018', '2019', '2021']
 
 
 for year in years:
     # Fedex cup points
-    fcp = make_dataframe("https://www.pgatour.com/stats/stat.02671.y{}.html".format(year), 4, 5)[['NAME', 'POINTS']]
+    # fcp = make_dataframe("https://www.pgatour.com/stats/stat.02671.y{}.html".format(year), 4, 5)[['NAME', 'POINTS']]
+
     # Top 10's and wins
     top10 = make_dataframe("https://www.pgatour.com/stats/stat.138.y{}.html".format(year), 3, 3)[
         ['NAME', 'TOP 10', '1ST']]
@@ -222,7 +223,7 @@ for year in years:
         df_one = pd.merge(df_one, df, on='NAME')
 
     # merge fex ex cup points
-    df_one = pd.merge(df_one, fcp, how='outer', on='NAME')
+    # df_one = pd.merge(df_one, fcp, how='outer', on='NAME')
     # Merge top 10's
     df_one = pd.merge(df_one, top10, how='outer', on='NAME')
 
@@ -234,7 +235,7 @@ for year in years:
     df_one['Year'] = year
 
     # Concat dataframe to overall dataframe
-    if year == '2014':
+    if year == '2016':
         df_total = pd.DataFrame()
         df_total = pd.concat([df_total, df_one], axis=0)
     else:
